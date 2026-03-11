@@ -1,0 +1,8 @@
+config.py
+__pycache__/
+*.pyc
+.pytest_cache/
+rejected/
+*.csv
+.idea/
+explore.py
