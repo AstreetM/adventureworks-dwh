@@ -4,5 +4,6 @@ __pycache__/
 .pytest_cache/
 rejected/
 *.csv
+!data/csv/*.csv
 .idea/
 explore.py

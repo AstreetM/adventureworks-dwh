@@ -1,0 +1,11 @@
+territory_key,territory_id,territory_name,country_code,continent
+1,1,Northwest,US,North America
+2,2,Northeast,US,North America
+3,3,Central,US,North America
+4,4,Southwest,US,North America
+5,5,Southeast,US,North America
+6,6,Canada,CA,North America
+7,7,France,FR,Europe
+8,8,Germany,DE,Europe
+9,9,Australia,AU,Pacific
+10,10,United Kingdom,GB,Europe

@@ -1,0 +1,18 @@
+salesperson_key,salesperson_id,first_name,last_name,full_name,job_title,territory_id,start_valid_date,end_valid_date,is_current
+1,274,Stephen,Jiang,Stephen Jiang,North American Sales Manager,,2026-03-11 10:12:46.6688330,,true
+3,276,Linda,Mitchell,Linda Mitchell,Sales Representative,4,2026-03-11 10:12:46.6688330,,true
+4,277,Jillian,Carson,Jillian Carson,Sales Representative,3,2026-03-11 10:12:46.6688330,,true
+5,278,Garrett,Vargas,Garrett Vargas,Sales Representative,6,2026-03-11 10:12:46.6688330,,true
+6,279,Tsvi,Reiter,Tsvi Reiter,Sales Representative,5,2026-03-11 10:12:46.6688330,,true
+7,280,Pamela,Ansman-Wolfe,Pamela Ansman-Wolfe,Sales Representative,1,2026-03-11 10:12:46.6688330,,true
+8,281,Shu,Ito,Shu Ito,Sales Representative,4,2026-03-11 10:12:46.6688330,,true
+9,282,José,Saraiva,José Saraiva,Sales Representative,6,2026-03-11 10:12:46.6688330,,true
+10,283,David,Campbell,David Campbell,Sales Representative,1,2026-03-11 10:12:46.6688330,,true
+11,284,Tete,Mensa-Annan,Tete Mensa-Annan,Sales Representative,1,2026-03-11 10:12:46.6688330,,true
+12,285,Syed,Abbas,Syed Abbas,Pacific Sales Manager,,2026-03-11 10:12:46.6688330,,true
+13,286,Lynn,Tsoflias,Lynn Tsoflias,Sales Representative,9,2026-03-11 10:12:46.6688330,,true
+14,287,Amy,Alberts,Amy Alberts,European Sales Manager,,2026-03-11 10:12:46.6688330,,true
+15,288,Rachel,Valdez,Rachel Valdez,Sales Representative,8,2026-03-11 10:12:46.6688330,,true
+16,289,Jae,Pak,Jae Pak,Sales Representative,10,2026-03-11 10:12:46.6688330,,true
+17,290,Ranjit,Varkey Chudukatil,Ranjit Varkey Chudukatil,Sales Representative,7,2026-03-11 10:12:46.6688330,,true
+19,275,Michael,Blythe,Michael Blythe,Sales Representative,2,2026-03-11 09:59:00.0054150,,true
