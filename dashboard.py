@@ -3,15 +3,12 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# ── Config ───────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Adventure Works — Sales Dashboard",
     page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
-# ── Palette ──────────────────────────────────────────────────────
 C = {
     "primary":   "#586643",
     "secondary": "#7A8F5F",
@@ -19,130 +16,102 @@ C = {
     "light":     "#E8EDE3",
     "lighter":   "#F4F6F1",
     "white":     "#FFFFFF",
-    "grey":      "#6B7280",
+    "grey":      "#4B5563",
     "dark":      "#1F2937",
     "border":    "#D1D9C8",
     "orange":    "#D47C2F",
 }
 
-# ── CSS Responsive ───────────────────────────────────────────────
 st.markdown(f"""
 <style>
-    /* Reset & base */
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
+    * {{ box-sizing: border-box; }}
     .stApp {{ background-color: {C['lighter']}; }}
-
-    /* Hide streamlit default elements */
     #MainMenu, footer, header {{ visibility: hidden; }}
     .block-container {{
         padding: 0 !important;
         max-width: 100% !important;
     }}
 
-    /* Header */
     .dash-header {{
         background: linear-gradient(135deg, {C['accent']} 0%, {C['primary']} 100%);
         padding: 20px 32px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
         margin-bottom: 0;
     }}
     .dash-header-title {{
         color: white;
-        font-size: clamp(16px, 3vw, 24px);
+        font-size: clamp(16px, 3vw, 22px);
         font-weight: 700;
-        letter-spacing: -0.3px;
     }}
     .dash-header-sub {{
         color: {C['light']};
-        font-size: clamp(11px, 1.5vw, 13px);
+        font-size: 12px;
+        margin-top: 4px;
         opacity: 0.9;
     }}
 
-    /* Nav pills */
-    .nav-container {{
+    .nav-bar {{
         background: {C['white']};
-        padding: 16px 32px;
+        border-bottom: 2px solid {C['border']};
+        padding: 0 32px;
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }}
+    .filter-bar {{
+        background: {C['lighter']};
+        padding: 12px 32px;
         border-bottom: 1px solid {C['border']};
         display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
-    }}
-    .nav-pills {{
-        display: flex;
-        gap: 8px;
+        gap: 12px;
         flex-wrap: wrap;
+    }}
+    .filter-label {{
+        font-size: 13px;
+        font-weight: 600;
+        color: {C['dark']};
     }}
 
-    /* KPI Cards */
     .kpi-grid {{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 16px;
         padding: 24px 32px 0;
     }}
     .kpi-card {{
         background: {C['white']};
         border-radius: 12px;
-        padding: 20px 16px;
+        padding: 18px 16px;
         border: 1px solid {C['border']};
         border-left: 4px solid {C['primary']};
         box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        transition: transform 0.2s, box-shadow 0.2s;
     }}
-    .kpi-card:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(88,102,67,0.15);
-    }}
-    .kpi-icon {{
-        font-size: 20px;
-        margin-bottom: 8px;
-    }}
+    .kpi-icon {{ font-size: 18px; margin-bottom: 8px; }}
     .kpi-value {{
-        font-size: clamp(20px, 3vw, 28px);
+        font-size: clamp(18px, 2.5vw, 26px);
         font-weight: 700;
         color: {C['primary']};
-        line-height: 1.1;
     }}
     .kpi-label {{
-        font-size: 12px;
+        font-size: 11px;
         color: {C['grey']};
         margin-top: 4px;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }}
-    .kpi-delta {{
-        font-size: 11px;
-        margin-top: 6px;
-        padding: 2px 8px;
-        border-radius: 20px;
-        display: inline-block;
-    }}
-    .kpi-delta-pos {{
-        background: #DCFCE7;
-        color: #15803D;
-    }}
-    .kpi-delta-neg {{
-        background: #FEE2E2;
-        color: #DC2626;
-    }}
 
-    /* Section title */
     .section-title {{
-        font-size: 15px;
-        font-weight: 600;
+        font-size: 14px;
+        font-weight: 700;
         color: {C['dark']};
-        padding: 24px 32px 0;
+        padding: 20px 32px 0;
         display: flex;
         align-items: center;
         gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }}
     .section-title::after {{
         content: '';
@@ -152,47 +121,28 @@ st.markdown(f"""
         margin-left: 12px;
     }}
 
-    /* Charts container */
-    .charts-container {{
+    .charts-pad {{
         padding: 16px 32px;
     }}
 
-    /* Sidebar */
-    .css-1d391kg, [data-testid="stSidebar"] {{
-        background: {C['white']};
-        border-right: 1px solid {C['border']};
+    /* Textes graphiques lisibles */
+    .js-plotly-plot .plotly text {{
+        fill: {C['dark']} !important;
     }}
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {{
         .dash-header {{ padding: 16px 16px; }}
+        .nav-bar {{ padding: 0 8px; }}
+        .filter-bar {{ padding: 10px 16px; }}
         .kpi-grid {{ padding: 16px 16px 0; gap: 12px; }}
-        .charts-container {{ padding: 12px 16px; }}
-        .section-title {{ padding: 16px 16px 0; }}
-        .nav-container {{ padding: 12px 16px; }}
-    }}
-
-    @media (max-width: 480px) {{
-        .kpi-grid {{
-            grid-template-columns: repeat(2, 1fr);
-        }}
-    }}
-
-    /* Dataframe styling */
-    .stDataFrame {{
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid {C['border']};
-    }}
-
-    /* Plotly charts */
-    .js-plotly-plot {{
-        border-radius: 12px;
+        .charts-pad {{ padding: 12px 16px; }}
+        .section-title {{ padding: 16px 16px 0; font-size: 12px; }}
+        .kpi-grid {{ grid-template-columns: repeat(2, 1fr); }}
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# ── Chargement données ───────────────────────────────────────────
+# ── Données ──────────────────────────────────────────────────────
 BASE_URL = "https://raw.githubusercontent.com/AstreetM/adventureworks-dwh/main/data/csv/"
 
 @st.cache_data(show_spinner="Chargement des données...")
@@ -208,7 +158,6 @@ def load_data():
 
 fact_sales, fact_header, dim_product, dim_customer, dim_territory, dim_ship, dim_date = load_data()
 
-# ── Jointures ────────────────────────────────────────────────────
 fs = fact_sales.merge(dim_date[["date_key","year","month","month_name"]],
                        left_on="order_date_key", right_on="date_key", how="left")
 fs = fs.merge(dim_product[["product_key","product_name","category","standard_cost"]],
@@ -230,61 +179,77 @@ mois_fr = {
 }
 fs["mois_label"] = fs["month"].map(mois_fr)
 
-# ── Layout helper ────────────────────────────────────────────────
-def chart_layout(fig, title=""):
-    fig.update_layout(
-        title=dict(text=title, font=dict(size=14, color=C["dark"]), x=0),
-        plot_bgcolor=C["white"],
-        paper_bgcolor=C["white"],
-        font=dict(color=C["grey"], size=12),
-        margin=dict(t=40, b=40, l=10, r=10),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02,
-                    xanchor="left", x=0),
-        hoverlabel=dict(bgcolor=C["white"], bordercolor=C["border"],
-                        font_size=12),
-    )
-    fig.update_xaxes(showgrid=False, showline=True,
-                     linecolor=C["border"], tickfont=dict(size=11))
-    fig.update_yaxes(showgrid=True, gridcolor="#F0F0F0",
-                     showline=False, tickfont=dict(size=11))
-    return fig
-
 # ── Header ───────────────────────────────────────────────────────
-st.markdown(f"""
+st.markdown("""
 <div class="dash-header">
-    <div>
-        <div class="dash-header-title">📊 Adventure Works — Sales Dashboard</div>
-        <div class="dash-header-sub">Période : 2011 — 2014 · Adventure Works Cycles</div>
-    </div>
-    <div class="dash-header-sub">Données mises à jour le 30/03/2026</div>
+    <div class="dash-header-title">Adventure Works — Sales Dashboard</div>
+    <div class="dash-header-sub">Période : 2011 — 2014 · Adventure Works Cycles</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Sidebar filters ──────────────────────────────────────────────
-with st.sidebar:
-    st.markdown(f"### 🎛 Filtres")
-    st.markdown("---")
-    years = sorted(fs["year"].dropna().unique().astype(int).tolist())
-    selected_years = st.multiselect("📅 Année", years, default=years)
-    st.markdown("---")
-    page = st.radio("📄 Page", [
-        "📈 Executive Summary",
-        "📦 Produits & Clients",
-        "🌍 Territoire & Opérations"
-    ])
+# ── Navigation dans la page ──────────────────────────────────────
+pages = ["Executive Summary", "Produits & Clients", "Territoire & Opérations"]
 
-# ── Filtres appliqués ────────────────────────────────────────────
-if not selected_years:
-    selected_years = years
+col_nav1, col_nav2, col_nav3, col_nav4 = st.columns([1, 1, 1, 2])
+with col_nav1:
+    if st.button("Executive Summary", use_container_width=True):
+        st.session_state["page"] = "Executive Summary"
+with col_nav2:
+    if st.button("Produits & Clients", use_container_width=True):
+        st.session_state["page"] = "Produits & Clients"
+with col_nav3:
+    if st.button("Territoire & Opérations", use_container_width=True):
+        st.session_state["page"] = "Territoire & Opérations"
 
+if "page" not in st.session_state:
+    st.session_state["page"] = "Executive Summary"
+
+page = st.session_state["page"]
+
+# ── Slicer Année ─────────────────────────────────────────────────
+years = sorted(fs["year"].dropna().unique().astype(int).tolist())
+col_f1, col_f2 = st.columns([1, 4])
+with col_f1:
+    selected_years = st.multiselect("Année", years, default=years, label_visibility="collapsed")
+    if not selected_years:
+        selected_years = years
+
+st.markdown(f"<div style='padding: 4px 32px 0; font-size:12px; color:{C['grey']};'>Filtrer par année ↑</div>",
+            unsafe_allow_html=True)
+
+# ── Filtres ──────────────────────────────────────────────────────
 fs_f = fs[fs["year"].isin(selected_years)]
-fh_f = fh[fh["order_date_key"].astype(str).str[:4].astype(int).isin(selected_years)]
-fh_f = fh_f.copy()
+fh_f = fact_header.merge(dim_territory[["territory_key","territory_name"]],
+                          on="territory_key", how="left")
+fh_f = fh_f.merge(dim_ship[["shipmethod_key","ship_method_name"]],
+                   on="shipmethod_key", how="left")
+fh_f = fh_f[fh_f["order_date_key"].astype(str).str[:4].astype(int).isin(selected_years)].copy()
+
+# ── Chart helper ─────────────────────────────────────────────────
+def chart_layout(fig, title=""):
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=13, color=C["dark"]), x=0),
+        plot_bgcolor=C["white"],
+        paper_bgcolor=C["white"],
+        font=dict(color=C["dark"], size=11),
+        margin=dict(t=48, b=40, l=10, r=10),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                    xanchor="left", x=0, font=dict(color=C["dark"])),
+        hoverlabel=dict(bgcolor=C["white"], bordercolor=C["border"],
+                        font_size=12, font_color=C["dark"]),
+    )
+    fig.update_xaxes(showgrid=False, showline=True,
+                     linecolor=C["border"],
+                     tickfont=dict(size=10, color=C["dark"]))
+    fig.update_yaxes(showgrid=True, gridcolor="#EBEBEB",
+                     showline=False,
+                     tickfont=dict(size=10, color=C["dark"]))
+    return fig
 
 # ════════════════════════════════════════════════════════════════
 # PAGE 1 — EXECUTIVE SUMMARY
 # ════════════════════════════════════════════════════════════════
-if page == "📈 Executive Summary":
+if page == "Executive Summary":
 
     ca_total  = fs_f["line_total"].sum()
     nb_cmd    = fh_f["sales_order_id"].nunique()
@@ -308,9 +273,6 @@ if page == "📈 Executive Summary":
             <div class="kpi-icon">📊</div>
             <div class="kpi-value">{marge_pct:.2f}%</div>
             <div class="kpi-label">Marge %</div>
-            <div class="kpi-delta {'kpi-delta-pos' if marge_pct > 0 else 'kpi-delta-neg'}">
-                {'▲' if marge_pct > 0 else '▼'} {abs(marge_pct):.1f}%
-            </div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon">🎯</div>
@@ -325,11 +287,10 @@ if page == "📈 Executive Summary":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">📈 Tendances temporelles</div>',
+    st.markdown('<div class="section-title">Tendances temporelles</div>',
                 unsafe_allow_html=True)
-
     with st.container():
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         ca_mois = fs_f.groupby(["year","month"])["line_total"].sum().reset_index()
         ca_mois = ca_mois[ca_mois["line_total"] > 0].sort_values(["year","month"])
         ca_mois["mois_label"] = ca_mois["month"].map(mois_fr)
@@ -344,19 +305,17 @@ if page == "📈 Executive Summary":
         st.plotly_chart(fig1, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">🌍 Répartition géographique & Canal</div>',
+    st.markdown('<div class="section-title">Répartition géographique & Canal</div>',
                 unsafe_allow_html=True)
-
     col1, col2 = st.columns([3, 2], gap="medium")
 
     with col1:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         ca_terr = fs_f.groupby("territory_name")["line_total"].sum()\
                       .reset_index().sort_values("line_total", ascending=True)
         fig2 = px.bar(
             ca_terr, x="line_total", y="territory_name", orientation="h",
             labels={"line_total":"Montant (€)", "territory_name":""},
-            color_discrete_sequence=[C["primary"]],
             text="line_total"
         )
         fig2.update_traces(texttemplate="%{text:,.0f}€", textposition="outside",
@@ -366,7 +325,7 @@ if page == "📈 Executive Summary":
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         fh_f["Canal"] = fh_f["online_order_flag"].apply(
             lambda x: "En ligne" if str(x).lower() in ["true","1"] else "En magasin"
         )
@@ -375,9 +334,11 @@ if page == "📈 Executive Summary":
             canal, names="Canal", values="sales_order_id", hole=0.55,
             color_discrete_sequence=[C["primary"], C["light"]]
         )
-        fig3.update_traces(textinfo="percent+label",
-                           textfont=dict(size=12),
-                           marker=dict(line=dict(color=C["white"], width=2)))
+        fig3.update_traces(
+            textinfo="percent+label",
+            textfont=dict(size=12, color=C["dark"]),
+            marker=dict(line=dict(color=C["white"], width=2))
+        )
         chart_layout(fig3, "Online vs Offline")
         fig3.update_layout(showlegend=False)
         st.plotly_chart(fig3, use_container_width=True)
@@ -386,15 +347,14 @@ if page == "📈 Executive Summary":
 # ════════════════════════════════════════════════════════════════
 # PAGE 2 — PRODUITS & CLIENTS
 # ════════════════════════════════════════════════════════════════
-elif page == "📦 Produits & Clients":
+elif page == "Produits & Clients":
 
-    st.markdown('<div class="section-title">📦 Analyse Produits</div>',
+    st.markdown('<div class="section-title">Analyse Produits</div>',
                 unsafe_allow_html=True)
-
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         top_prod = (
             fs_f.groupby("product_name")["line_total"].sum()
             .reset_index().nlargest(10, "line_total")
@@ -412,7 +372,7 @@ elif page == "📦 Produits & Clients":
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         qty_cat = (
             fs_f.groupby("category")["order_qty"].sum()
             .reset_index().sort_values("order_qty", ascending=False)
@@ -430,13 +390,12 @@ elif page == "📦 Produits & Clients":
         st.plotly_chart(fig5, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">👤 Analyse Clients</div>',
+    st.markdown('<div class="section-title">Analyse Clients</div>',
                 unsafe_allow_html=True)
-
     col3, col4 = st.columns(2, gap="medium")
 
     with col3:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         top_clients = (
             fs_f.groupby("full_name").agg(
                 CA_Total=("line_total","sum"),
@@ -453,12 +412,11 @@ elif page == "📦 Produits & Clients":
         top_clients = top_clients[["full_name","CA_Total","Quantite","Marge_%"]]
         top_clients.columns = ["Client","CA Total","Quantité","Marge %"]
         st.markdown("**Top 10 Clients**")
-        st.dataframe(top_clients, use_container_width=True, hide_index=True,
-                     height=380)
+        st.dataframe(top_clients, use_container_width=True, hide_index=True, height=380)
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col4:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         ca_marge = fs_f.groupby("category").agg(
             CA_Total=("line_total","sum"),
             Marge_Brute=("margin","sum")
@@ -484,15 +442,14 @@ elif page == "📦 Produits & Clients":
 # ════════════════════════════════════════════════════════════════
 # PAGE 3 — TERRITOIRE & OPÉRATIONS
 # ════════════════════════════════════════════════════════════════
-elif page == "🌍 Territoire & Opérations":
+elif page == "Territoire & Opérations":
 
-    st.markdown('<div class="section-title">🌍 Performance Géographique</div>',
+    st.markdown('<div class="section-title">Performance Géographique</div>',
                 unsafe_allow_html=True)
-
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         ca_cont = (
             fs_f.groupby("continent")["line_total"].sum()
             .reset_index().sort_values("line_total", ascending=False)
@@ -511,7 +468,7 @@ elif page == "🌍 Territoire & Opérations":
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         ca_terr_y = (
             fs_f.groupby(["territory_name","year"])["line_total"]
             .sum().reset_index().sort_values(["territory_name","year"])
@@ -537,22 +494,27 @@ elif page == "🌍 Territoire & Opérations":
             marker=dict(size=7), yaxis="y2"
         ))
         fig8.update_layout(
-            yaxis=dict(title="CA (€)", showgrid=True, gridcolor="#F0F0F0"),
-            yaxis2=dict(title="YoY %", overlaying="y", side="right", showgrid=False),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+            yaxis=dict(title="CA (€)", showgrid=True, gridcolor="#EBEBEB",
+                       titlefont=dict(color=C["dark"]),
+                       tickfont=dict(color=C["dark"])),
+            yaxis2=dict(title="YoY %", overlaying="y", side="right",
+                        showgrid=False,
+                        titlefont=dict(color=C["dark"]),
+                        tickfont=dict(color=C["dark"])),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                        font=dict(color=C["dark"])),
             xaxis_title=""
         )
         chart_layout(fig8, "CA et Croissance YoY par Territoire")
         st.plotly_chart(fig8, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">🚚 Opérations & Livraison</div>',
+    st.markdown('<div class="section-title">Opérations & Livraison</div>',
                 unsafe_allow_html=True)
-
     col3, col4 = st.columns(2, gap="medium")
 
     with col3:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         delai = (
             fh_f.groupby("ship_method_name")["days_to_ship"]
             .mean().reset_index().sort_values("days_to_ship", ascending=True)
@@ -570,7 +532,7 @@ elif page == "🌍 Territoire & Opérations":
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col4:
-        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="charts-pad">', unsafe_allow_html=True)
         fh_f["online"] = fh_f["online_order_flag"].apply(
             lambda x: 1 if str(x).lower() in ["true","1"] else 0
         )
